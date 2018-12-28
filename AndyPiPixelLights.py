@@ -11,16 +11,13 @@ import time
 import sys
 
 
-class AndyPiPixelLights:
+class AndyPiPixelLights():
 
-    # import RPi.GPIO as GPIO, time, os
-    NUMBER_OF_PIXELS = 50  # set number of pixels in your strip
-    DEBUG = 1
-    GPIO.setmode(GPIO.BCM)
-
-    SPICLK = 23  # The SPI clock pin on the raspberry pi, pin 23
-    SPIDO = 19  # The SPI data line (MOSI) on the raspberry pi, pin 19
-    ledpixels = [0] * NUMBER_OF_PIXELS
+    def __init__(self, NUMBER_OF_PIXELS=1, SPICLK=23, SPIDO=19):
+        GPIO.setmode(GPIO.BCM)
+        self.SPICLK = SPICLK  # The SPI clock pin on the raspberry pi
+        self.SPIDO = SPIDO  # The SPI data line (MOSI) on the raspberry pi
+        self.ledpixels = [0] * NUMBER_OF_PIXELS
 
     def slowspiwrite(self, clockpin, datapin, byteout):
         GPIO.setup(clockpin, GPIO.OUT)
@@ -84,28 +81,33 @@ class AndyPiPixelLights:
             WheelPos -= 170
             return self.Color(0, WheelPos * 3, 255 - WheelPos * 3)
 
-    def rainbowCycle(self, pixels, wait):
+    def rainbowCycle(self, wait):
         for j in range(256):  # one cycle of all 256 colors in the wheel
-            for i in range(len(pixels)):
+            for i in range(len(self.ledpixels)):
                 # tricky math! we use each pixel as a fraction of the full 96-color wheel
                 # (thats the i / strip.numPixels() part)
                 # Then add in j which makes the colors go around per pixel
                 # the % 96 is to make the wheel cycle around
-                self.setpixelcolor(pixels, i, self.Wheel(((i * 256 / len(pixels)) + j) % 256))
-            self.writestrip(pixels)
+                self.setpixelcolor(self.ledpixels, i, self.Wheel(((i * 256 / len(self.ledpixels)) + j) % 256))
+            self.writestrip(self.ledpixels)
             time.sleep(wait)
 
     def cls(self, pixels):
         for i in range(len(pixels)):
             self.setpixelcolor(pixels, i, self.Color(0, 0, 0))
             self.writestrip(pixels)
+    
+    def lightall(self, r, g, b)
+        for i in range(len(self.ledpixels)):
+            self.setpixelcolor(self.ledpixels, i, self.Color(r, g, b))
+            self.writestrip(self.ledpixels)
 
     def main(self):
         try:
             self.colorwipe(self.ledpixels, self.Color(255, 0, 0), 0.05)
             self.colorwipe(self.ledpixels, self.Color(0, 255, 0), 0.05)
             self.colorwipe(self.ledpixels, self.Color(0, 0, 255), 0.05)
-            self.rainbowCycle(self.ledpixels, 0.00)
+            self.rainbowCycle(0.00)
             self.cls(self.ledpixels)
 
         except KeyboardInterrupt:
