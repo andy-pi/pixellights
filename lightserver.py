@@ -1,13 +1,14 @@
 '''
-Flask server for Raspberry Pi IoT
+Flask server for Raspberry Pi Google Activated lights
 '''
 
 from flask import Flask
-from AndyPiPixelLights import AndyPiPixelLights
+import adafruit_ws2801
+import board
 from config import *
 app = Flask(__name__)
 
-pixellights = AndyPiPixelLights(10)
+leds = adafruit_ws2801.WS2801(board.SCK, board.MOSI, 12, brightness=1)
 
 @app.route('/lights/<colour>/<password>')
 def lights(colour, password):
@@ -18,35 +19,32 @@ def lights(colour, password):
     if password not in PASSWORD:
         return 404
 
-    if colour == "on":
-        pixellights.lightall(0, 0, 0)
-
-    elif colour == "off":
-        pixellights.lightall(255, 255, 255)
+    if colour == "off":
+        leds.fill((255, 255, 255))
 
     elif colour == "warm":
-        pixellights.lightall(255, 214, 170)
+        leds.fill((255, 214, 170))
 
     elif colour == "red":
-        pixellights.lightall(255, 0, 0)
+        leds.fill((255, 0, 0))
 
     elif colour == "blue":
-        pixellights.lightall(0, 0, 255)
+        leds.fill((0, 0, 255))
 
     elif colour == "green":
-        pixellights.lightall(0, 255, 0)
+        leds.fill((0, 255,0))
 
     elif colour == "purple":
-        pixellights.lightall(170, 0, 255)
+        leds.fill((170, 0, 255))
 
     elif colour == "orange":
-        pixellights.lightall(255, 128, 0)
+        leds.fill((255, 128, 0))
 
     elif colour == "yellow":
-        pixellights.lightall(255, 255, 0)
+        leds.fill((255, 255, 0))
 
     else:
-        pixellights.rainbowcycle(0.00)
+        leds.fill((0, 0, 0))
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=80)#, debug=True)
